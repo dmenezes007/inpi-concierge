@@ -5,14 +5,12 @@ const state = {
   allRows: [],
   filteredRows: [],
   visibleCount: PAGE_SIZE,
+  selectedTema: '',
 };
 
 const els = {
   searchInput: document.querySelector('#searchInput'),
-  temaFilter: document.querySelector('#temaFilter'),
-  fonteFilter: document.querySelector('#fonteFilter'),
-  tipoFilter: document.querySelector('#tipoFilter'),
-  formatoFilter: document.querySelector('#formatoFilter'),
+  temaButtons: document.querySelector('#temaButtons'),
   statsGrid: document.querySelector('#statsGrid'),
   resultsContainer: document.querySelector('#resultsContainer'),
   resultInfo: document.querySelector('#resultInfo'),
@@ -29,12 +27,9 @@ async function init() {
 
     const csvText = await response.text();
     state.allRows = parseCSV(csvText);
-    state.filteredRows = [...state.allRows];
+    state.filteredRows = [];
 
-    fillSelect(els.temaFilter, uniqueValues(state.allRows, 'tema_macro'));
-    fillSelect(els.fonteFilter, uniqueValues(state.allRows, 'fonte_arquivo'));
-    fillSelect(els.tipoFilter, uniqueValues(state.allRows, 'tipo_item'));
-    fillSelect(els.formatoFilter, uniqueValues(state.allRows, 'fonte_tipo'));
+    renderTemaButtons(uniqueValues(state.allRows, 'tema_macro'));
 
     bindEvents();
     renderStats();
@@ -51,10 +46,6 @@ function bindEvents() {
   };
 
   els.searchInput.addEventListener('input', debounce(onFilterChange, 180));
-  els.temaFilter.addEventListener('change', onFilterChange);
-  els.fonteFilter.addEventListener('change', onFilterChange);
-  els.tipoFilter.addEventListener('change', onFilterChange);
-  els.formatoFilter.addEventListener('change', onFilterChange);
 
   els.loadMoreBtn.addEventListener('click', () => {
     state.visibleCount += PAGE_SIZE;
@@ -64,22 +55,25 @@ function bindEvents() {
 
 function applyFilters() {
   const term = els.searchInput.value.trim().toLowerCase();
-  const tema = els.temaFilter.value;
-  const fonte = els.fonteFilter.value;
-  const tipo = els.tipoFilter.value;
-  const formato = els.formatoFilter.value;
+  const tema = state.selectedTema;
+
+  if (!term) {
+    state.filteredRows = [];
+    renderStats();
+    renderResults();
+    return;
+  }
 
   state.filteredRows = state.allRows.filter((row) => {
     if (tema && row.tema_macro !== tema) return false;
-    if (fonte && row.fonte_arquivo !== fonte) return false;
-    if (tipo && row.tipo_item !== tipo) return false;
-    if (formato && row.fonte_tipo !== formato) return false;
-
-    if (!term) return true;
 
     const haystack = [
       row.titulo_item,
       row.conteudo,
+      row.resumo_ia,
+      row.intencao_consulta_ia,
+      row.orientacao_ao_usuario_ia,
+      row.termos_sugeridos_ia,
       row.secao,
       row.palavras_chave,
       row.fonte_arquivo,
@@ -123,15 +117,36 @@ function renderResults() {
 
   els.resultsContainer.innerHTML = '';
 
+  if (!term) {
+    els.resultInfo.textContent = 'Digite sua consulta para visualizar resultados.';
+    els.loadMoreBtn.disabled = true;
+    els.loadMoreBtn.textContent = 'Carregar mais';
+    return;
+  }
+
   for (const row of visible) {
     const node = els.cardTemplate.content.firstElementChild.cloneNode(true);
 
     const title = row.titulo_item || row.secao || row.tipo_item || 'Registro sem titulo';
-    const excerpt = truncate(row.conteudo || '', 520);
+    const excerpt = truncate(row.resumo_ia || row.conteudo || '', 520);
+    const orientation = truncate(row.orientacao_ao_usuario_ia || '', 240);
+    const terms = row.termos_sugeridos_ia || '';
 
     node.querySelector('.result-title').innerHTML = highlight(escapeHtml(title), term);
-    node.querySelector('.result-meta').textContent = `${row.tema_macro || 'Sem tema'} | ${row.fonte_arquivo || 'Fonte nao identificada'} | ${row.tipo_item || 'item'}`;
+    node.querySelector('.result-meta').textContent = `${row.tema_macro || 'Sem tema'} | ${row.intencao_consulta_ia || 'Consulta geral'} | ${row.fonte_arquivo || 'Fonte nao identificada'}`;
     node.querySelector('.result-content').innerHTML = highlight(escapeHtml(excerpt), term);
+    if (orientation) {
+      const orientNode = document.createElement('p');
+      orientNode.className = 'result-content';
+      orientNode.innerHTML = `<strong>Orientacao:</strong> ${highlight(escapeHtml(orientation), term)}`;
+      node.appendChild(orientNode);
+    }
+    if (terms) {
+      const termsNode = document.createElement('p');
+      termsNode.className = 'result-meta';
+      termsNode.textContent = `Termos sugeridos: ${terms}`;
+      node.appendChild(termsNode);
+    }
     node.querySelector('.result-ref').textContent = row.referencia || '';
 
     els.resultsContainer.appendChild(node);
@@ -145,13 +160,30 @@ function renderResults() {
   els.loadMoreBtn.textContent = hasMore ? 'Carregar mais' : 'Fim dos resultados';
 }
 
-function fillSelect(select, values) {
+function renderTemaButtons(values) {
+  const allBtn = buildTemaButton('Todos', '');
+  allBtn.classList.add('active');
+  els.temaButtons.appendChild(allBtn);
+
   for (const value of values) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = value;
-    select.appendChild(option);
+    els.temaButtons.appendChild(buildTemaButton(value, value));
   }
+}
+
+function buildTemaButton(label, value) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'tema-btn';
+  btn.textContent = label;
+  btn.dataset.tema = value;
+  btn.addEventListener('click', () => {
+    state.selectedTema = value;
+    state.visibleCount = PAGE_SIZE;
+    document.querySelectorAll('.tema-btn').forEach((node) => node.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  });
+  return btn;
 }
 
 function uniqueValues(rows, key) {

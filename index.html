@@ -18,30 +18,13 @@
       </header>
 
       <section class="toolbar card">
-        <label class="field field-search">
-          <span>Busca textual</span>
-          <input id="searchInput" type="search" placeholder="Ex.: prioridade, patente, oposição, prazo" />
-        </label>
-
-        <label class="field">
-          <span>Tema macro</span>
-          <select id="temaFilter"><option value="">Todos</option></select>
-        </label>
-
-        <label class="field">
-          <span>Arquivo de origem</span>
-          <select id="fonteFilter"><option value="">Todos</option></select>
-        </label>
-
-        <label class="field">
-          <span>Tipo de item</span>
-          <select id="tipoFilter"><option value="">Todos</option></select>
-        </label>
-
-        <label class="field">
-          <span>Formato de origem</span>
-          <select id="formatoFilter"><option value="">Todos</option></select>
-        </label>
+        <div class="search-center-wrap">
+          <input id="searchInput" class="search-button-like" type="search" placeholder="Consulte a informação do seu interesse" />
+        </div>
+        <div class="tema-buttons-wrap">
+          <p class="tema-label">Tema macro</p>
+          <div id="temaButtons" class="tema-buttons"></div>
+        </div>
       </section>
 
       <section class="stats-grid" id="statsGrid"></section>
