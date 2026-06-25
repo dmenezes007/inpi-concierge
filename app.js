@@ -180,7 +180,7 @@ function buildTemaButton(label, value) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'tema-btn';
-  btn.textContent = label;
+  btn.textContent = formatTemaLabel(label);
   btn.dataset.tema = value;
   btn.addEventListener('click', () => {
     state.selectedTema = value;
@@ -196,6 +196,27 @@ function uniqueValues(rows, key) {
   return [...new Set(rows.map((row) => (row[key] || '').trim()).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b, 'pt-BR'),
   );
+}
+
+function formatTemaLabel(label) {
+  const map = {
+    'Carta de Servicos': 'Carta de Serviços',
+    'Desenhos Industriais': 'Desenhos Industriais',
+    'Glossario de PI': 'Glossário de PI',
+    'Governanca e Visao Sistematica': 'Governança e Visão Sistemática',
+    'Indicacoes Geograficas': 'Indicações Geográficas',
+    'Legislacao e Normas': 'Legislação e Normas',
+    'Marcas': 'Marcas',
+    'Pareceres Juridicos': 'Pareceres Jurídicos',
+    'Patentes': 'Patentes',
+    'Programas de Computador': 'Programas de Computador',
+    'Retribuicoes e Taxas': 'Retribuições e Taxas',
+    'Topografias de Circuitos Integrados': 'Topografias de Circuitos Integrados',
+    'Contratos de Tecnologia': 'Contratos de Tecnologia',
+    'Todos': 'Todos',
+  };
+
+  return map[label] || label;
 }
 
 function parseCSV(csvText) {

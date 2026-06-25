@@ -88,6 +88,12 @@ h1 {
   margin-bottom: 1rem;
 }
 
+.toolbar.card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
 .search-center-wrap {
   display: flex;
   justify-content: center;
@@ -107,10 +113,10 @@ h1 {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1px;
-  background: conic-gradient(from 0deg, var(--accent-pink), var(--gov-cyan), var(--accent-gold), var(--accent-pink));
-  animation: spin-border 3.2s linear infinite;
-  filter: drop-shadow(0 0 6px rgba(216, 34, 130, 0.32)) drop-shadow(0 0 7px rgba(36, 169, 219, 0.3)) drop-shadow(0 0 6px rgba(238, 199, 30, 0.28));
+  border: 1px solid transparent;
+  background: conic-gradient(from var(--border-angle), var(--accent-pink), var(--gov-cyan), var(--accent-gold), var(--accent-pink)) border-box;
+  animation: spin-border-angle 2.8s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(216, 34, 130, 0.24)) drop-shadow(0 0 5px rgba(36, 169, 219, 0.22)) drop-shadow(0 0 4px rgba(238, 199, 30, 0.2));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -351,6 +357,21 @@ mark {
 @keyframes spin-border {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes spin-border-angle {
+  from {
+    --border-angle: 0deg;
+  }
+  to {
+    --border-angle: 360deg;
   }
 }
 
