@@ -296,11 +296,26 @@ select:focus {
   color: var(--gov-blue-dark);
 }
 
-.result-meta,
-.result-ref {
+.result-meta {
   margin: 0.25rem 0 0;
   font-size: 0.8rem;
   color: var(--gov-muted);
+}
+
+.result-body {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.result-paragraph {
+  margin: 0;
+  color: #2d2d2d;
+  line-height: 1.58;
+  padding: 0.55rem 0.7rem;
+  border-left: 3px solid rgba(19, 81, 180, 0.18);
+  background: rgba(237, 245, 255, 0.45);
+  border-radius: 8px;
 }
 
 .result-content {
@@ -316,17 +331,24 @@ select:focus {
 }
 
 .result-link-wrap {
-  margin: 0.45rem 0 0;
+  margin: 0.55rem 0 0;
 }
 
-.result-link {
-  color: var(--gov-blue);
+.result-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: 10px;
+  padding: 0.45rem 0.75rem;
+  background: linear-gradient(135deg, var(--gov-blue-dark), var(--gov-blue));
+  color: #ffffff;
   font-weight: 700;
   text-decoration: none;
 }
 
-.result-link:hover {
-  text-decoration: underline;
+.result-link-btn:hover {
+  filter: brightness(1.05);
 }
 
 .actions {

@@ -1,4 +1,4 @@
-const DATA_FILE = './base-conhecimento-inpi.csv';
+const DATA_FILE = './base-conhecimento-inpi.json';
 const PAGE_SIZE = 40;
 
 const state = {
@@ -23,10 +23,10 @@ init();
 async function init() {
   try {
     const response = await fetch(DATA_FILE, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Falha ao carregar CSV (${response.status})`);
+    if (!response.ok) throw new Error(`Falha ao carregar base (${response.status})`);
 
-    const csvText = await response.text();
-    state.allRows = parseCSV(csvText);
+    const jsonData = await response.json();
+    state.allRows = normalizeRows(jsonData);
     state.filteredRows = [];
 
     renderTemaButtons(uniqueValues(state.allRows, 'tema_macro'));
@@ -70,6 +70,7 @@ function applyFilters() {
     const haystack = [
       row.titulo_item,
       row.conteudo,
+      (row.conteudo_blocos || []).join(' '),
       row.resumo_ia,
       row.intencao_consulta_ia,
       row.orientacao_ao_usuario_ia,
@@ -126,13 +127,24 @@ function renderResults() {
   for (const row of visible) {
     const node = els.cardTemplate.content.firstElementChild.cloneNode(true);
 
-    const excerpt = row.conteudo || row.resumo_ia || '';
-    const orientation = row.orientacao_ao_usuario_ia || '';
+    const contentBlocks = Array.isArray(row.conteudo_blocos) && row.conteudo_blocos.length
+      ? row.conteudo_blocos
+      : [row.conteudo || row.resumo_ia || ''];
+    const orientation = (row.orientacao_ao_usuario_ia || '').replace(/\s*Referência:\s*.*$/i, '').trim();
     const terms = row.termos_sugeridos_ia || '';
     const link = row.link || '';
 
     node.querySelector('.result-meta').textContent = `${row.tema_macro || 'Sem tema'} | ${row.intencao_consulta_ia || 'Consulta geral'}`;
-    node.querySelector('.result-content').innerHTML = highlight(escapeHtml(excerpt), term);
+
+    const bodyNode = node.querySelector('.result-body');
+    bodyNode.innerHTML = '';
+    for (const block of contentBlocks) {
+      if (!String(block || '').trim()) continue;
+      const p = document.createElement('p');
+      p.className = 'result-paragraph';
+      p.innerHTML = highlight(escapeHtml(String(block)), term);
+      bodyNode.appendChild(p);
+    }
 
     const guidanceNode = node.querySelector('.result-guidance');
     guidanceNode.innerHTML = orientation
@@ -142,7 +154,7 @@ function renderResults() {
     const termsNode = node.querySelector('.result-terms');
     termsNode.textContent = terms ? `Termos sugeridos: ${terms}` : '';
 
-    const linkAnchor = node.querySelector('.result-link');
+    const linkAnchor = node.querySelector('.result-link-btn');
     const linkWrap = node.querySelector('.result-link-wrap');
     if (link) {
       linkAnchor.href = link;
@@ -151,8 +163,6 @@ function renderResults() {
     } else {
       linkWrap.style.display = 'none';
     }
-
-    node.querySelector('.result-ref').textContent = row.referencia || '';
 
     els.resultsContainer.appendChild(node);
   }
@@ -218,59 +228,16 @@ function formatTemaLabel(label) {
   return map[label] || label;
 }
 
-function parseCSV(csvText) {
-  const rows = [];
-  let field = '';
-  let row = [];
-  let inQuotes = false;
-
-  const text = csvText.replace(/^\uFEFF/, '');
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const next = text[i + 1];
-
-    if (ch === '"') {
-      if (inQuotes && next === '"') {
-        field += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-
-    if (ch === ',' && !inQuotes) {
-      row.push(field);
-      field = '';
-      continue;
-    }
-
-    if ((ch === '\n' || ch === '\r') && !inQuotes) {
-      if (ch === '\r' && next === '\n') i++;
-      row.push(field);
-      if (row.length > 1 || row[0] !== '') rows.push(row);
-      row = [];
-      field = '';
-      continue;
-    }
-
-    field += ch;
-  }
-
-  if (field.length > 0 || row.length > 0) {
-    row.push(field);
-    rows.push(row);
-  }
-
-  const headers = (rows.shift() || []).map((h) => h.trim());
-  return rows.map((cols) => {
-    const obj = {};
-    headers.forEach((header, index) => {
-      obj[header] = (cols[index] || '').trim();
-    });
-    return obj;
-  });
+function normalizeRows(rows) {
+  if (!Array.isArray(rows)) return [];
+  return rows.map((row) => ({
+    ...row,
+    conteudo_blocos: Array.isArray(row.conteudo_blocos)
+      ? row.conteudo_blocos
+      : row.conteudo_blocos
+        ? [String(row.conteudo_blocos)]
+        : [],
+  }));
 }
 
 function escapeHtml(text) {
