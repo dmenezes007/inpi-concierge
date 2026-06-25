@@ -127,26 +127,32 @@ function renderResults() {
   for (const row of visible) {
     const node = els.cardTemplate.content.firstElementChild.cloneNode(true);
 
-    const title = row.titulo_item || row.secao || row.tipo_item || 'Registro sem titulo';
-    const excerpt = truncate(row.resumo_ia || row.conteudo || '', 520);
-    const orientation = truncate(row.orientacao_ao_usuario_ia || '', 240);
+    const excerpt = row.conteudo || row.resumo_ia || '';
+    const orientation = row.orientacao_ao_usuario_ia || '';
     const terms = row.termos_sugeridos_ia || '';
+    const link = row.link || '';
 
-    node.querySelector('.result-title').innerHTML = highlight(escapeHtml(title), term);
-    node.querySelector('.result-meta').textContent = `${row.tema_macro || 'Sem tema'} | ${row.intencao_consulta_ia || 'Consulta geral'} | ${row.fonte_arquivo || 'Fonte nao identificada'}`;
+    node.querySelector('.result-meta').textContent = `${row.tema_macro || 'Sem tema'} | ${row.intencao_consulta_ia || 'Consulta geral'}`;
     node.querySelector('.result-content').innerHTML = highlight(escapeHtml(excerpt), term);
-    if (orientation) {
-      const orientNode = document.createElement('p');
-      orientNode.className = 'result-content';
-      orientNode.innerHTML = `<strong>Orientacao:</strong> ${highlight(escapeHtml(orientation), term)}`;
-      node.appendChild(orientNode);
+
+    const guidanceNode = node.querySelector('.result-guidance');
+    guidanceNode.innerHTML = orientation
+      ? `<strong>Orientação:</strong> ${highlight(escapeHtml(orientation), term)}`
+      : '';
+
+    const termsNode = node.querySelector('.result-terms');
+    termsNode.textContent = terms ? `Termos sugeridos: ${terms}` : '';
+
+    const linkAnchor = node.querySelector('.result-link');
+    const linkWrap = node.querySelector('.result-link-wrap');
+    if (link) {
+      linkAnchor.href = link;
+      linkAnchor.textContent = 'Acessar fonte';
+      linkWrap.style.display = 'block';
+    } else {
+      linkWrap.style.display = 'none';
     }
-    if (terms) {
-      const termsNode = document.createElement('p');
-      termsNode.className = 'result-meta';
-      termsNode.textContent = `Termos sugeridos: ${terms}`;
-      node.appendChild(termsNode);
-    }
+
     node.querySelector('.result-ref').textContent = row.referencia || '';
 
     els.resultsContainer.appendChild(node);
@@ -247,13 +253,8 @@ function parseCSV(csvText) {
   });
 }
 
-function truncate(text, maxLen) {
-  if (text.length <= maxLen) return text;
-  return `${text.slice(0, maxLen)}...`;
-}
-
 function escapeHtml(text) {
-  return text
+  return String(text || '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')

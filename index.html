@@ -5,24 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1351b4" />
     <title>INPI Concierge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWix+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkR4j8NBmaTIBR41Zllb5jLoDQLWv7xpyxQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <header class="hero">
-        <p class="kicker">Sistema de Consulta Documental</p>
         <h1>INPI Concierge</h1>
         <p class="subtitle">
-          Base consolidada de Propriedade Intelectual com busca unificada, filtros por tema e navegação por fonte.
+          Base de Conhecimento do INPI
         </p>
       </header>
 
       <section class="toolbar card">
         <div class="search-center-wrap">
-          <input id="searchInput" class="search-button-like" type="search" placeholder="Consulte a informação do seu interesse" />
+          <div class="search-animated-ring">
+            <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+            <input id="searchInput" class="search-button-like" type="search" placeholder="Consulte a informação do seu interesse" />
+          </div>
         </div>
         <div class="tema-buttons-wrap">
-          <p class="tema-label">Tema macro</p>
           <div id="temaButtons" class="tema-buttons"></div>
         </div>
       </section>
@@ -43,11 +45,11 @@
 
     <template id="resultCardTemplate">
       <article class="result-card">
-        <header>
-          <h3 class="result-title"></h3>
-          <p class="result-meta"></p>
-        </header>
+        <p class="result-meta"></p>
         <p class="result-content"></p>
+        <p class="result-content result-guidance"></p>
+        <p class="result-meta result-terms"></p>
+        <p class="result-link-wrap"><a class="result-link" target="_blank" rel="noopener noreferrer">Acessar fonte</a></p>
         <p class="result-ref"></p>
       </article>
     </template>

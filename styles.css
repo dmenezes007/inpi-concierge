@@ -5,6 +5,8 @@
   --gov-blue-dark: #0c326f;
   --gov-blue-soft: #edf5ff;
   --gov-cyan: #00bde3;
+  --accent-pink: #d82282;
+  --accent-gold: #eec71e;
   --gov-border: #dfe1e2;
   --gov-text: #1b1b1b;
   --gov-muted: #555555;
@@ -46,19 +48,11 @@ body::before {
 
 .hero {
   margin-bottom: 1rem;
-}
-
-.kicker {
-  margin: 0;
-  color: var(--gov-blue);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: 0.8rem;
+  text-align: center;
 }
 
 h1 {
-  margin: 0.2rem 0 0.6rem;
+  margin: 0.2rem 0 0.45rem;
   font-size: clamp(1.8rem, 2.7vw, 2.6rem);
   line-height: 1.15;
   color: var(--gov-blue-dark);
@@ -66,8 +60,9 @@ h1 {
 
 .subtitle {
   margin: 0;
-  max-width: 70ch;
+  width: 100%;
   color: var(--gov-muted);
+  font-weight: 700;
 }
 
 .card {
@@ -90,20 +85,55 @@ h1 {
   justify-content: center;
 }
 
-.search-button-like {
+.search-animated-ring {
   width: min(760px, 100%);
-  text-align: center;
+  position: relative;
   border-radius: 999px;
-  border: 1px solid rgba(19, 81, 180, 0.28);
-  padding: 0.8rem 1.2rem;
-  font-weight: 600;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.search-animated-ring::before {
+  content: '';
+  position: absolute;
+  inset: -120%;
+  background: conic-gradient(from 0deg, var(--accent-pink), var(--gov-cyan), var(--accent-gold), var(--accent-pink));
+  animation: spin-border 3.2s linear infinite;
+  filter: drop-shadow(0 0 9px rgba(216, 34, 130, 0.5)) drop-shadow(0 0 10px rgba(36, 169, 219, 0.46)) drop-shadow(0 0 9px rgba(238, 199, 30, 0.42));
+}
+
+.search-animated-ring::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
   background: linear-gradient(180deg, #ffffff, var(--gov-blue-soft));
-  box-shadow: 0 10px 24px rgba(19, 81, 180, 0.08);
+  border-radius: 999px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b8bec7;
+  z-index: 2;
+}
+
+.search-button-like {
+  width: 100%;
+  border-radius: 999px;
+  border: 0;
+  padding: 0.8rem 1.2rem 0.8rem 2.75rem;
+  font-weight: 600;
+  color: #b8bec7;
+  background: transparent;
+  position: relative;
+  z-index: 2;
 }
 
 .search-button-like::placeholder {
-  color: var(--gov-blue-dark);
-  opacity: 0.9;
+  color: #b8bec7;
+  opacity: 1;
 }
 
 .tema-buttons-wrap {
@@ -112,16 +142,10 @@ h1 {
   gap: 0.45rem;
 }
 
-.tema-label {
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--gov-blue-dark);
-}
-
 .tema-buttons {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.45rem;
 }
 
@@ -243,6 +267,26 @@ select:focus {
   margin: 0.6rem 0 0;
   color: #2d2d2d;
   line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.result-guidance {
+  color: #1f2f4f;
+}
+
+.result-link-wrap {
+  margin: 0.45rem 0 0;
+}
+
+.result-link {
+  color: var(--gov-blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.result-link:hover {
+  text-decoration: underline;
 }
 
 .actions {
@@ -272,6 +316,12 @@ mark {
   color: inherit;
   padding: 0 0.1rem;
   border-radius: 2px;
+}
+
+@keyframes spin-border {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 1024px) {
