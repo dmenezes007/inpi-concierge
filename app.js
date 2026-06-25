@@ -79,6 +79,7 @@ function applyFilters() {
       row.palavras_chave,
       row.fonte_arquivo,
       row.tema_macro,
+      Object.values(row.dados_csv || {}).join(' '),
     ]
       .join(' ')
       .toLowerCase();
@@ -138,12 +139,16 @@ function renderResults() {
 
     const bodyNode = node.querySelector('.result-body');
     bodyNode.innerHTML = '';
-    for (const block of contentBlocks) {
-      if (!String(block || '').trim()) continue;
-      const p = document.createElement('p');
-      p.className = 'result-paragraph';
-      p.innerHTML = highlight(escapeHtml(String(block)), term);
-      bodyNode.appendChild(p);
+    if (row.fonte_tipo === 'csv' && row.dados_csv && Object.keys(row.dados_csv).length) {
+      bodyNode.appendChild(renderCsvTable(row.dados_csv, term));
+    } else {
+      for (const block of contentBlocks) {
+        if (!String(block || '').trim()) continue;
+        const p = document.createElement('p');
+        p.className = 'result-paragraph';
+        p.innerHTML = highlight(escapeHtml(String(block)), term);
+        bodyNode.appendChild(p);
+      }
     }
 
     const guidanceNode = node.querySelector('.result-guidance');
@@ -237,7 +242,77 @@ function normalizeRows(rows) {
       : row.conteudo_blocos
         ? [String(row.conteudo_blocos)]
         : [],
+    dados_csv: parseStructuredJson(row.dados_estruturados_json),
   }));
+}
+
+function parseStructuredJson(value) {
+  if (!value) return null;
+  if (typeof value === 'object' && !Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(String(value));
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function renderCsvTable(data, term) {
+  const wrap = document.createElement('div');
+  wrap.className = 'result-table-wrap';
+
+  const table = document.createElement('table');
+  table.className = 'result-table';
+
+  const tbody = document.createElement('tbody');
+
+  for (const [key, rawValue] of Object.entries(data)) {
+    const value = String(rawValue ?? '').trim();
+    if (!value) continue;
+
+    const tr = document.createElement('tr');
+
+    const th = document.createElement('th');
+    th.textContent = formatFieldLabel(key);
+
+    const td = document.createElement('td');
+    if (isLikelyUrl(value)) {
+      const a = document.createElement('a');
+      a.className = 'result-table-link';
+      a.href = value;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = value;
+      td.appendChild(a);
+    } else {
+      td.innerHTML = highlight(escapeHtml(value), term);
+    }
+
+    tr.appendChild(th);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  return wrap;
+}
+
+function isLikelyUrl(text) {
+  return /^https?:\/\//i.test(text);
+}
+
+function formatFieldLabel(label) {
+  const map = {
+    Acesso: 'Acesso',
+    Link: 'Link',
+    Legislacao: 'Legislação',
+    Descricao: 'Descrição',
+    Situacao: 'Situação',
+    Numero: 'Número',
+    CorSituacao: 'Cor da Situação',
+  };
+  return map[label] || label;
 }
 
 function escapeHtml(text) {

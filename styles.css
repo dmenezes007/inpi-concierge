@@ -308,6 +308,52 @@ select:focus {
   margin-top: 0.55rem;
 }
 
+.result-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--gov-border);
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 420px;
+}
+
+.result-table th,
+.result-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid rgba(19, 81, 180, 0.12);
+  line-height: 1.45;
+}
+
+.result-table th {
+  width: 28%;
+  color: var(--gov-blue-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: rgba(237, 245, 255, 0.7);
+}
+
+.result-table td {
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.result-table-link {
+  color: var(--gov-blue);
+  text-decoration: none;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.result-table-link:hover {
+  text-decoration: underline;
+}
+
 .result-paragraph {
   margin: 0;
   color: #2d2d2d;
