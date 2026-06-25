@@ -127,8 +127,11 @@ h1 {
   left: 1.1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #c1c7d0;
-  z-index: 2;
+  width: 22px;
+  height: 22px;
+  color: #8e98a8;
+  z-index: 3;
+  pointer-events: none;
 }
 
 .search-button-like {
@@ -224,7 +227,7 @@ select:focus {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
