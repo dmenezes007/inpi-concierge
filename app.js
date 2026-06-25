@@ -5,7 +5,7 @@ const state = {
   allRows: [],
   filteredRows: [],
   visibleCount: PAGE_SIZE,
-  selectedTema: '',
+  selectedTemas: [],
 };
 
 const els = {
@@ -55,9 +55,9 @@ function bindEvents() {
 
 function applyFilters() {
   const term = els.searchInput.value.trim().toLowerCase();
-  const tema = state.selectedTema;
+  const hasTemaFilter = state.selectedTemas.length > 0;
 
-  if (!term) {
+  if (!term && !hasTemaFilter) {
     state.filteredRows = [];
     renderStats();
     renderResults();
@@ -65,7 +65,7 @@ function applyFilters() {
   }
 
   state.filteredRows = state.allRows.filter((row) => {
-    if (tema && row.tema_macro !== tema) return false;
+    if (hasTemaFilter && !state.selectedTemas.includes(row.tema_macro)) return false;
 
     const haystack = [
       row.titulo_item,
@@ -132,7 +132,6 @@ function renderResults() {
       ? row.conteudo_blocos
       : [row.conteudo || row.resumo_ia || ''];
     const orientation = (row.orientacao_ao_usuario_ia || '').replace(/\s*Referência:\s*.*$/i, '').trim();
-    const terms = row.termos_sugeridos_ia || '';
     const link = row.link || '';
 
     node.querySelector('.result-meta').textContent = `${row.tema_macro || 'Sem tema'} | ${row.intencao_consulta_ia || 'Consulta geral'}`;
@@ -140,7 +139,7 @@ function renderResults() {
     const bodyNode = node.querySelector('.result-body');
     bodyNode.innerHTML = '';
     if (row.fonte_tipo === 'csv' && row.dados_csv && Object.keys(row.dados_csv).length) {
-      bodyNode.appendChild(renderCsvTable(row.dados_csv, term));
+      bodyNode.appendChild(renderCsvTable(row.dados_csv, term, row.fonte_arquivo));
     } else {
       for (const block of contentBlocks) {
         if (!String(block || '').trim()) continue;
@@ -155,9 +154,6 @@ function renderResults() {
     guidanceNode.innerHTML = orientation
       ? `<strong>Orientação:</strong> ${highlight(escapeHtml(orientation), term)}`
       : '';
-
-    const termsNode = node.querySelector('.result-terms');
-    termsNode.textContent = terms ? `Termos sugeridos: ${terms}` : '';
 
     const linkAnchor = node.querySelector('.result-link-btn');
     const linkWrap = node.querySelector('.result-link-wrap');
@@ -181,6 +177,7 @@ function renderResults() {
 }
 
 function renderTemaButtons(values) {
+  els.temaButtons.innerHTML = '';
   const allBtn = buildTemaButton('Todos', '');
   allBtn.classList.add('active');
   els.temaButtons.appendChild(allBtn);
@@ -197,13 +194,30 @@ function buildTemaButton(label, value) {
   btn.textContent = formatTemaLabel(label);
   btn.dataset.tema = value;
   btn.addEventListener('click', () => {
-    state.selectedTema = value;
+    if (!value) {
+      state.selectedTemas = [];
+    } else if (state.selectedTemas.includes(value)) {
+      state.selectedTemas = state.selectedTemas.filter((tema) => tema !== value);
+    } else {
+      state.selectedTemas = [...state.selectedTemas, value];
+    }
+
     state.visibleCount = PAGE_SIZE;
-    document.querySelectorAll('.tema-btn').forEach((node) => node.classList.remove('active'));
-    btn.classList.add('active');
+    refreshTemaButtonsState();
     applyFilters();
   });
   return btn;
+}
+
+function refreshTemaButtonsState() {
+  document.querySelectorAll('.tema-btn').forEach((node) => {
+    const tema = node.dataset.tema || '';
+    if (!tema) {
+      node.classList.toggle('active', state.selectedTemas.length === 0);
+    } else {
+      node.classList.toggle('active', state.selectedTemas.includes(tema));
+    }
+  });
 }
 
 function uniqueValues(rows, key) {
@@ -257,7 +271,7 @@ function parseStructuredJson(value) {
   }
 }
 
-function renderCsvTable(data, term) {
+function renderCsvTable(data, term, sourceFile) {
   const wrap = document.createElement('div');
   wrap.className = 'result-table-wrap';
 
@@ -267,6 +281,8 @@ function renderCsvTable(data, term) {
   const tbody = document.createElement('tbody');
 
   for (const [key, rawValue] of Object.entries(data)) {
+    if (!shouldDisplayCsvField(sourceFile, key)) continue;
+
     const value = String(rawValue ?? '').trim();
     if (!value) continue;
 
@@ -298,6 +314,29 @@ function renderCsvTable(data, term) {
   return wrap;
 }
 
+function shouldDisplayCsvField(sourceFile, key) {
+  const source = String(sourceFile || '').toLowerCase();
+  const field = normalizeFieldKey(key);
+
+  if (source === 'legislacao-inpi.csv' && ['cor', 'corsituacao', 'acesso'].includes(field)) {
+    return false;
+  }
+
+  if (source === 'pareceres-pfe-inpi.csv' && field === 'link') {
+    return false;
+  }
+
+  return true;
+}
+
+function normalizeFieldKey(label) {
+  return String(label || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toLowerCase();
+}
+
 function isLikelyUrl(text) {
   return /^https?:\/\//i.test(text);
 }
@@ -311,8 +350,23 @@ function formatFieldLabel(label) {
     Situacao: 'Situação',
     Numero: 'Número',
     CorSituacao: 'Cor da Situação',
+    TemaMacro: 'Tema',
+    Tema: 'Tema',
+    TituloItem: 'Título',
+    Conteudo: 'Conteúdo',
+    FonteArquivo: 'Fonte',
+    TipoItem: 'Tipo de item',
   };
-  return map[label] || label;
+
+  if (map[label]) return map[label];
+
+  const normalized = String(label || '')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .trim();
+
+  if (!normalized) return '';
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function escapeHtml(text) {
