@@ -342,23 +342,27 @@ function isLikelyUrl(text) {
 }
 
 function formatFieldLabel(label) {
-  const map = {
-    Acesso: 'Acesso',
-    Link: 'Link',
-    Legislacao: 'Legislação',
-    Descricao: 'Descrição',
-    Situacao: 'Situação',
-    Numero: 'Número',
-    CorSituacao: 'Cor da Situação',
-    TemaMacro: 'Tema',
-    Tema: 'Tema',
-    TituloItem: 'Título',
-    Conteudo: 'Conteúdo',
-    FonteArquivo: 'Fonte',
-    TipoItem: 'Tipo de item',
+  const normalizedMap = {
+    acesso: 'Acesso',
+    link: 'Link',
+    legislacao: 'Legislação',
+    descricao: 'Descrição',
+    situacao: 'Situação',
+    numero: 'Número',
+    corsituacao: 'Cor da Situação',
+    temamacro: 'Tema',
+    tema: 'Tema',
+    tituloitem: 'Título',
+    conteudo: 'Conteúdo',
+    fontearquivo: 'Fonte',
+    tipoitem: 'Tipo de item',
+    definicao: 'Definição',
+    especie: 'Espécie',
+    correlacoes: 'Correlações',
   };
 
-  if (map[label]) return map[label];
+  const normalizedKey = normalizeFieldKey(label);
+  if (normalizedMap[normalizedKey]) return normalizedMap[normalizedKey];
 
   const normalized = String(label || '')
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')

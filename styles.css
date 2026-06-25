@@ -391,10 +391,13 @@ select:focus {
   color: #ffffff;
   font-weight: 700;
   text-decoration: none;
+  transition: transform 140ms ease, box-shadow 180ms ease, filter 180ms ease;
 }
 
 .result-link-btn:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(19, 81, 180, 0.28);
 }
 
 .actions {
