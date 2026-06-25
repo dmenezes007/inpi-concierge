@@ -33,10 +33,7 @@ body::before {
   height: min(52vw, 36rem);
   pointer-events: none;
   opacity: 0.2;
-  background:
-    radial-gradient(circle at 22% 26%, rgba(216, 34, 130, 0.45) 0, transparent 35%),
-    radial-gradient(circle at 72% 22%, rgba(36, 169, 219, 0.42) 0, transparent 37%),
-    radial-gradient(circle at 46% 72%, rgba(238, 199, 30, 0.35) 0, transparent 30%);
+  background: none;
 }
 
 .app-shell {
