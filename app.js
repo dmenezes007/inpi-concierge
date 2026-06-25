@@ -92,10 +92,9 @@ function applyFilters() {
 function renderStats() {
   const rows = state.filteredRows;
   const stats = [
-    { label: 'Registros filtrados', value: rows.length.toLocaleString('pt-BR') },
-    { label: 'Arquivos cobertos', value: uniqueValues(rows, 'fonte_arquivo').length.toLocaleString('pt-BR') },
-    { label: 'Temas macro', value: uniqueValues(rows, 'tema_macro').length.toLocaleString('pt-BR') },
-    { label: 'Tipos de item', value: uniqueValues(rows, 'tipo_item').length.toLocaleString('pt-BR') },
+    { label: 'Registros localizados', value: rows.length.toLocaleString('pt-BR') },
+    { label: 'Fontes consultadas', value: uniqueValues(rows, 'fonte_arquivo').length.toLocaleString('pt-BR') },
+    { label: 'Temas associados', value: uniqueValues(rows, 'tema_macro').length.toLocaleString('pt-BR') },
   ];
 
   els.statsGrid.innerHTML = stats

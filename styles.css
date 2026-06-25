@@ -154,6 +154,7 @@ h1 {
 
 .search-warning {
   margin: 0;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
