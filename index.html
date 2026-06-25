@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1351b4" />
+    <title>INPI Concierge</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="hero">
+        <p class="kicker">Sistema de Consulta Documental</p>
+        <h1>INPI Concierge</h1>
+        <p class="subtitle">
+          Base consolidada de Propriedade Intelectual com busca unificada, filtros por tema e navegação por fonte.
+        </p>
+      </header>
+
+      <section class="toolbar card">
+        <label class="field field-search">
+          <span>Busca textual</span>
+          <input id="searchInput" type="search" placeholder="Ex.: prioridade, patente, oposição, prazo" />
+        </label>
+
+        <label class="field">
+          <span>Tema macro</span>
+          <select id="temaFilter"><option value="">Todos</option></select>
+        </label>
+
+        <label class="field">
+          <span>Arquivo de origem</span>
+          <select id="fonteFilter"><option value="">Todos</option></select>
+        </label>
+
+        <label class="field">
+          <span>Tipo de item</span>
+          <select id="tipoFilter"><option value="">Todos</option></select>
+        </label>
+
+        <label class="field">
+          <span>Formato de origem</span>
+          <select id="formatoFilter"><option value="">Todos</option></select>
+        </label>
+      </section>
+
+      <section class="stats-grid" id="statsGrid"></section>
+
+      <section class="results card">
+        <div class="results-head">
+          <h2>Resultados</h2>
+          <p id="resultInfo">Carregando base...</p>
+        </div>
+        <div id="resultsContainer" class="results-list"></div>
+        <div class="actions">
+          <button id="loadMoreBtn" class="btn" type="button">Carregar mais</button>
+        </div>
+      </section>
+    </div>
+
+    <template id="resultCardTemplate">
+      <article class="result-card">
+        <header>
+          <h3 class="result-title"></h3>
+          <p class="result-meta"></p>
+        </header>
+        <p class="result-content"></p>
+        <p class="result-ref"></p>
+      </article>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
